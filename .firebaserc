@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "multi-platform-firebase-bundle": {
+      "hosting": {
+        "bundle-firebase-services": [
+          "multi-platform-firebase-bundle"
+        ]
+      }
+    }
+  }
+}

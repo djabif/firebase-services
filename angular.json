@@ -121,8 +121,13 @@
               "devServerTarget": "bundle-firebase-services:serve:production"
             }
           }
+        },
+        "deploy": {
+          "builder": "@angular/fire:deploy",
+          "options": {}
         }
       }
-    }},
+    }
+  },
   "defaultProject": "bundle-firebase-services"
 }
