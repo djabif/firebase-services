@@ -20,5 +20,23 @@
 
   <button (click)="insertProduct()">Create Product</button>
   <br>
-
+  <button (click)="signInWithEmail()">sign In With Email</button>
+  <br>
+  <button (click)="doFacebookLogin()">sign In With FB</button>
+  <br>
+  <button (click)="doGoogleLogin()">sign In With Google</button>
+  <br>
+  <button (click)="doTwitterLogin()">sign In With Twitter</button>
+  <br>
+  <button (click)="signUp()">Sign Up</button>
+  <button (click)="signOut()">Log Out</button>
+  <br>
+  <br>
+  <br>
+  <div *ngIf="loggedUser">
+    <h2>Hello {{loggedUser.displayName}}</h2>
+  </div>
+  <div *ngIf="!loggedUser">
+    <h2>There is no logged user</h2>
+  </div>
 </ul>

@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { FirebaseAuthenticationService } from './firebase-authentication.service';
 import { FirebaseService } from './firebase.service';
 import { ProductModel } from './models/product.model';
+// import { UserModel } from './models/user.model';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -9,9 +11,19 @@ import { ProductModel } from './models/product.model';
 })
 export class AppComponent {
   products$: Observable<ProductModel[]>;
+  loggedUser: any;
 
-  constructor(public firebaseService: FirebaseService) {
+  constructor(
+    public firebaseService: FirebaseService,
+    public firebaseAuthenticationService: FirebaseAuthenticationService
+  ) {
     this.products$ = firebaseService.getProducts();
+
+    this.firebaseAuthenticationService.getLoggedUserObservable()
+    .subscribe(user => {
+      // debugger;
+      this.loggedUser = user;
+    });
   }
 
   insertProduct() {
@@ -43,4 +55,70 @@ export class AppComponent {
   updateProduct(product: ProductModel) {
     this.firebaseService.updateProduct(product);
   }
+
+  signInWithEmail() {
+    // this.resetSubmitError();
+    this.firebaseAuthenticationService.signInWithEmail('dayana.jabif@gmail.com', '123456')
+    .then(result => {
+      // navigate to user profile
+      this.firebaseAuthenticationService.saveUserData(result);
+      // this.redirectLoggedUserToProfilePage();
+    })
+    .catch(error => {
+      // this.submitError = error.message;
+      // this.dismissLoading();
+    });
+  }
+
+  doFacebookLogin(): void {
+    // this.resetSubmitError();
+    // this.prepareForAuthWithProvidersRedirection('facebook');
+
+    this.firebaseAuthenticationService.signInWithFacebook()
+    .subscribe((result) => {
+      // This gives you a Facebook Access Token. You can use it to access the Facebook API.
+      const token = result.credential.accessToken;
+      this.firebaseAuthenticationService.saveUserData(result);
+      // this.redirectLoggedUserToProfilePage();
+    }, (error) => {
+      // this.manageAuthWithProvidersErrors(error.message);
+    });
+  }
+
+  doGoogleLogin(): void {
+    // this.resetSubmitError();
+    // this.prepareForAuthWithProvidersRedirection('google');
+
+    this.firebaseAuthenticationService.signInWithGoogle()
+    .subscribe((result) => {
+      // This gives you a Google Access Token. You can use it to access the Google API.
+      var token = result.credential.accessToken;
+      this.firebaseAuthenticationService.saveUserData(result);
+      // this.redirectLoggedUserToProfilePage();
+    }, (error) => {
+        console.log(error);
+      // this.manageAuthWithProvidersErrors(error.message);
+    });
+  }
+
+  doTwitterLogin(): void {
+    // this.resetSubmitError();
+    // this.prepareForAuthWithProvidersRedirection('twitter');
+
+    this.firebaseAuthenticationService.signInWithTwitter()
+    .subscribe((result) => {
+      // This gives you a Twitter Access Token. You can use it to access the Twitter API.
+      var token = result.credential.accessToken;
+      this.firebaseAuthenticationService.saveUserData(result);
+      // this.redirectLoggedUserToProfilePage();
+    }, (error) => {
+      console.log(error);
+      // this.manageAuthWithProvidersErrors(error.message);
+    });
+  }
+
+  signOut() {
+    this.firebaseAuthenticationService.signOut();
+  }
+
 }
