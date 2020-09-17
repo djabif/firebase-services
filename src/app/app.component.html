@@ -28,15 +28,21 @@
   <br>
   <button (click)="doTwitterLogin()">sign In With Twitter</button>
   <br>
-  <button (click)="signUp()">Sign Up</button>
+  <button (click)="signUpWithEmail()">Sign Up With Email</button>
   <button (click)="signOut()">Log Out</button>
   <br>
   <br>
   <br>
   <div *ngIf="loggedUser">
     <h2>Hello {{loggedUser.displayName}}</h2>
+    <!-- <img [src]="loggedUser.image"/> -->
   </div>
   <div *ngIf="!loggedUser">
     <h2>There is no logged user</h2>
   </div>
+
+  <p>You need to be logged in to upload an image</p>
+  <input type="file" (change)="uploadFile($event)" />
+   <div>{{ uploadPercent | async }}</div>
+   <a [href]="downloadURL | async">{{ downloadURL | async }}</a>
 </ul>

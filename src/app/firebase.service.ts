@@ -5,13 +5,17 @@ import { CategoryModel } from './models/category.model';
 import { ProductModel } from './models/product.model';
 import { first, map } from 'rxjs/operators';
 import { TagModel } from './models/tag.model';
+import { AngularFireStorage, AngularFireStorageReference, AngularFireUploadTask } from '@angular/fire/storage';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FirebaseService {
 
-  constructor(public firestore: AngularFirestore) { }
+  constructor(
+    public firestore: AngularFirestore,
+    private storage: AngularFireStorage
+  ) { }
 
   getProducts(): Observable<ProductModel[]> {
     return this.firestore.collection<ProductModel>('products').snapshotChanges()
@@ -77,5 +81,14 @@ export class FirebaseService {
     }).catch(function(error) {
       console.error("Error updating document: ", error);
     });
+  }
+
+  uploadFile(filePath: string, file:string): AngularFireUploadTask {
+    return this.storage.upload(filePath, file);
+  }
+
+  getFileRef(filePath: string): AngularFireStorageReference {
+    // Create a reference
+    return this.storage.ref(filePath);
   }
 }

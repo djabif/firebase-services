@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
 import { Observable, of } from 'rxjs';
+import { finalize, tap } from 'rxjs/operators';
 import { FirebaseAuthenticationService } from './firebase-authentication.service';
 import { FirebaseService } from './firebase.service';
 import { ProductModel } from './models/product.model';
+import { UserModel } from './models/user.model';
 // import { UserModel } from './models/user.model';
 @Component({
   selector: 'app-root',
@@ -13,6 +15,9 @@ export class AppComponent {
   products$: Observable<ProductModel[]>;
   loggedUser: any;
 
+  uploadPercent: Observable<number>;
+  downloadURL: Observable<string>;
+
   constructor(
     public firebaseService: FirebaseService,
     public firebaseAuthenticationService: FirebaseAuthenticationService
@@ -21,9 +26,37 @@ export class AppComponent {
 
     this.firebaseAuthenticationService.getLoggedUserObservable()
     .subscribe(user => {
-      // debugger;
       this.loggedUser = user;
     });
+  }
+
+  uploadFile(event) {
+    const file = event.target.files[0];
+    const filePath = 'test-file';
+
+    const task = this.firebaseService.uploadFile(filePath, file);
+
+    const fileRef = this.firebaseService.getFileRef(filePath);
+
+    // observe percentage changes
+    this.uploadPercent = task.percentageChanges();
+    // get notified when the download URL is available
+    task.snapshotChanges().pipe(
+        finalize(() => {
+          // this.downloadURL = fileRef.getDownloadURL();
+          // save image to user
+          this.downloadURL = fileRef.getDownloadURL().pipe(
+            tap((imageUrl: string) => {
+              let user = new UserModel();
+              user.uid = this.firebaseAuthenticationService.getLoggedUser().uid;
+              user.image = imageUrl;
+              this.firebaseAuthenticationService.updateUser(user);
+            })
+          )
+
+        })
+     )
+    .subscribe()
   }
 
   insertProduct() {
@@ -58,13 +91,31 @@ export class AppComponent {
 
   signInWithEmail() {
     // this.resetSubmitError();
-    this.firebaseAuthenticationService.signInWithEmail('dayana.jabif@gmail.com', '123456')
+    this.firebaseAuthenticationService.signInWithEmail('dayanajabif@gmail.com', '123456')
     .then(result => {
       // navigate to user profile
+      // debugger;
       this.firebaseAuthenticationService.saveUserData(result);
       // this.redirectLoggedUserToProfilePage();
     })
     .catch(error => {
+          // debugger;
+      // this.submitError = error.message;
+      // this.dismissLoading();
+    });
+  }
+
+  signUpWithEmail() {
+    // this.resetSubmitError();
+    this.firebaseAuthenticationService.signUpWithEmail('dayanajabif@gmail.com', '123456')
+    .then(result => {
+      // navigate to user profile
+      // debugger;
+      this.firebaseAuthenticationService.saveUserData(result);
+      // this.redirectLoggedUserToProfilePage();
+    })
+    .catch(error => {
+          // debugger;
       // this.submitError = error.message;
       // this.dismissLoading();
     });

@@ -80,32 +80,36 @@ export class FirebaseAuthenticationService {
 
   saveUserData(signInResult: any) {
     const userInfo = signInResult.user;
-    const userCredentials = signInResult.credential;
-    const additionalProfileInfo = signInResult.additionalUserInfo.profile;
+    // const userCredentials = signInResult.credential;
+    const additionalProfileInfo = signInResult.additionalUserInfo;
 
-    let user = new UserModel();
-    user.email = userInfo.uid;
-    user.email = userInfo.email;
-    user.image = this.getPhotoURL(userCredentials.providerId, userInfo.photoURL);
-    user.name = userInfo.displayName;
+    // if new user then save it to Firestore
+    if (additionalProfileInfo.isNewUser) {
+      let user = new UserModel();
+      user.uid = userInfo.uid;
+      user.email = userInfo.email;
+      user.image = this.getPhotoURL(additionalProfileInfo.providerId, userInfo.photoURL);
+      user.name = userInfo.displayName;
 
-    // Get a user's provider-specific profile information
-    if (userCredentials.providerId === "twitter.com") {
-      user.description = additionalProfileInfo.description;
-      user.location = additionalProfileInfo.location;
-      user.twUsername = additionalProfileInfo.screen_name;
+      // Get a user's provider-specific profile information
+      if (additionalProfileInfo.providerId === "twitter.com") {
+        user.description = additionalProfileInfo.profile?.description;
+        user.location = additionalProfileInfo.profile?.location;
+        user.twUsername = additionalProfileInfo.profile?.screen_name;
+      }
+      if (additionalProfileInfo.providerId === "facebook.com") {
+
+      }
+
+      this.firestore.collection('users').doc(user.uid).set(Object.assign({}, user))
+      .then(function() {
+        console.log("Document successfully written!");
+      })
+      .catch(function(error) {
+        console.error("Error writing document: ", error);
+      });
     }
-    if (userCredentials.providerId === "facebook.com") {
 
-    }
-
-    this.firestore.collection('users').add(Object.assign({}, user))
-    .then(function(docRef) {
-      console.log("Document written with ID: ", docRef.id);
-    })
-    .catch(function(error) {
-      console.error("Error adding document: ", error);
-    });
   }
 
   getPhotoURL(signInProviderId: string, photoURL: string): string {
@@ -122,6 +126,26 @@ export class FirebaseAuthenticationService {
       default:
         return photoURL;
     }
+  }
+
+  updateUser(user: UserModel) {
+    this.firestore.collection('users').doc(user.uid).update(Object.assign({}, user))
+    .then(function() {
+      console.log("Document successfully updated!");
+    })
+    .catch(function(error) {
+      // The document probably doesn't exist.
+      console.error("Error updating document: ", error);
+    });
+  }
+
+  deleteUser(userId: string) {
+    this.firestore.collection('users').doc(userId).delete()
+    .then(function() {
+      console.log("Document successfully deleted!");
+    }).catch(function(error) {
+      console.error("Error removing document: ", error);
+    });
   }
 
 }
