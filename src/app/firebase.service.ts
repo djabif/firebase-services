@@ -56,19 +56,19 @@ export class FirebaseService {
 
   insertProduct(product: ProductModel) {
     this.firestore.collection('products').add(Object.assign({}, product))
-    .then(function(docRef) {
+    .then((docRef) => {
       console.log("Document written with ID: ", docRef.id);
     })
-    .catch(function(error) {
+    .catch((error) => {
       console.error("Error adding document: ", error);
     });
   }
 
   deleteProduct(productId: string) {
     this.firestore.collection('products').doc(productId).delete()
-    .then(function() {
+    .then(() => {
       console.log("Document successfully deleted!");
-    }).catch(function(error) {
+    }).catch((error) => {
       console.error("Error removing document: ", error);
     });
   }
@@ -76,9 +76,9 @@ export class FirebaseService {
   updateProduct(productModel: ProductModel) {
     const {category$, tags$, ...product} = productModel;
     this.firestore.collection('products').doc(product.id).set(product)
-    .then(function() {
+    .then(() => {
       console.log("Document successfully updated!");
-    }).catch(function(error) {
+    }).catch((error) => {
       console.error("Error updating document: ", error);
     });
   }
